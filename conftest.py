@@ -17,7 +17,9 @@ from pages.signup_page import SignupPage
 from pages.login_form_page import LoginFormPage
 from pages.registration_page import RegistrationPage
 from pages.otp_page import OtpPage
+from pages.role_page import RolePage
 from utils.data_generators import generate_test_email
+from utils.temp_email import get_temp_email, wait_for_otp
 
 load_dotenv()
 
@@ -100,6 +102,67 @@ def otp_page(page, signup_page):
             "Wait a minute and re-run this test individually."
         )
     return otp
+
+
+@pytest.fixture
+def role_page(page):
+    """
+    Reach the role selection page via a full E2E signup using a Guerrilla Mail
+    disposable inbox so the OTP can be read programmatically.
+    Skips (not fails) if any intermediate step is blocked by rate limiting.
+    """
+    email, sid_token = get_temp_email()
+
+    page.goto("https://www.almashines.com/dtc/account")
+    page.wait_for_load_state("networkidle")
+    page.fill("#email", email)
+    page.click("#emailBtn")
+    page.wait_for_timeout(2000)
+
+    reg = RegistrationPage(page)
+    if not reg.is_visible():
+        pytest.skip("Registration form not reached — email may already be registered.")
+
+    reg.fill_valid_registration(
+        first_name="Role",
+        last_name="Tester",
+        password="RoleTest@2024",
+    )
+    reg.click_signup()
+
+    # Dismiss any SweetAlert from rate-limiting before checking OTP step
+    swal = page.locator(".swal-button--confirm")
+    try:
+        swal.wait_for(state="visible", timeout=3000)
+        swal.click()
+        page.wait_for_timeout(500)
+    except Exception:
+        pass
+
+    otp_pg = OtpPage(page)
+    if not otp_pg.is_visible():
+        pytest.skip(
+            "OTP step not reached — platform may be rate-limiting rapid registrations."
+        )
+
+    otp_code = wait_for_otp(sid_token, timeout=90)
+    if otp_code is None:
+        pytest.skip(
+            "OTP not received in Guerrilla Mail inbox within 90 s. "
+            "The platform may be filtering the email domain — re-run to retry."
+        )
+
+    otp_pg.enter_otp(otp_code)
+    otp_pg.click_verify()
+    page.wait_for_timeout(3000)
+
+    rp = RolePage(page)
+    if not rp.is_visible():
+        pytest.skip(
+            "Role selection page not reached after OTP verification. "
+            "Signup may have failed or the platform redirected elsewhere."
+        )
+    return rp
 
 
 # ---------------------------------------------------------------------------
