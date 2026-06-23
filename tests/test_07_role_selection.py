@@ -33,10 +33,10 @@ def test_role_page_key_elements_present(role_page):
         "Role dropdown should be present"
     assert role_page.page.locator(role_page.JOIN_BTN).is_visible(), \
         "'Join Alumni Network' button should be present"
-    assert role_page.page.locator(role_page.PRIVACY_CHECKBOX).is_visible(), \
-        "Privacy Policy checkbox should be present"
-    assert role_page.page.locator(role_page.CONSENT_CHECKBOX).is_visible(), \
-        "Consent Form checkbox should be present"
+    assert role_page.page.locator(role_page.PRIVACY_LABEL).is_visible(), \
+        "Privacy Policy checkbox label should be present"
+    assert role_page.page.locator(role_page.CONSENT_LABEL).is_visible(), \
+        "Consent Form checkbox label should be present"
 
 
 @pytest.mark.e2e

@@ -10,8 +10,13 @@ class RolePage:
     ROLE_SELECT = 'select[name="role"]'
     YOJ_SELECT = 'select[name="yoj"]'       # Year of Joining
     YOP_SELECT = 'select[name="yop"]'       # Year of Graduation (year of passing)
+    # MDL (Material Design Lite) checkboxes: the <input> has opacity:0 so
+    # is_visible() returns False. Use labels for presence checks; use
+    # check(force=True) to interact with the hidden-but-laid-out input.
     PRIVACY_CHECKBOX = "#privacy-terms"
     CONSENT_CHECKBOX = "#consent-form"
+    PRIVACY_LABEL = 'label[for="privacy-terms"]'
+    CONSENT_LABEL = 'label[for="consent-form"]'
     JOIN_BTN = "#btn3_sgnup"
     PAGE_HEADING = "text=Add your role details in"
 
@@ -48,10 +53,12 @@ class RolePage:
         self.page.locator(self.YOP_SELECT).select_option(label=year)
 
     def check_privacy_terms(self):
-        self.page.locator(self.PRIVACY_CHECKBOX).check()
+        # MDL positions the opacity-0 input outside Playwright's scroll reach;
+        # .evaluate("click") fires the native DOM click directly, triggering Angular's handler.
+        self.page.locator(self.PRIVACY_CHECKBOX).evaluate("el => el.click()")
 
     def check_consent_form(self):
-        self.page.locator(self.CONSENT_CHECKBOX).check()
+        self.page.locator(self.CONSENT_CHECKBOX).evaluate("el => el.click()")
 
     def is_privacy_checked(self) -> bool:
         return self.page.locator(self.PRIVACY_CHECKBOX).is_checked()
