@@ -11,66 +11,13 @@
 
 The automated suite covers happy-path and common-error scenarios for the email entry, registration, OTP, and role-selection steps. The cases below are **intentionally left as manual** because:
 
-- They rely on OAuth providers (social login) that cannot be automated without real credentials or a controlled IdP
 - They verify non-deterministic time-based behaviour (OTP expiry, email delivery latency)
 - They check purely visual / sensory attributes (layout, accessibility, responsive breakpoints)
-- They involve side-effects that are hard to undo in automation (completed profile, joined network)
 - They require observation of browser-specific quirks outside a single Chromium runner
 
 ---
 
-## TC-M-01: Facebook OAuth Login
-
-**Category:** Social Login  
-**Priority:** High
-
-**Steps:**
-1. Navigate to `https://www.almashines.com/dtc/account`
-2. Click **Continue with Facebook**
-3. Complete Facebook OAuth login with a valid Facebook account
-4. Observe redirect back to AlmaShines
-
-**Expected Result:** User is authenticated and redirected to the dashboard or role selection page.
-
-**Why Manual:** Automating OAuth requires real Facebook credentials or a mock IdP. Both introduce security risk or infrastructure overhead beyond the assignment scope. Facebook's bot-detection would also block headless automation.
-
----
-
-## TC-M-02: Google OAuth Login
-
-**Category:** Social Login  
-**Priority:** High
-
-**Steps:**
-1. Navigate to `https://www.almashines.com/dtc/account`
-2. Click **Continue with Google**
-3. Complete Google OAuth login with a valid Google account
-4. Observe redirect back to AlmaShines
-
-**Expected Result:** User is authenticated and redirected to the dashboard or role selection page.
-
-**Why Manual:** Same rationale as TC-M-01. Google's reCAPTCHA and account-activity checks actively block headless browsers.
-
----
-
-## TC-M-03: LinkedIn OAuth Login
-
-**Category:** Social Login  
-**Priority:** Medium
-
-**Steps:**
-1. Navigate to `https://www.almashines.com/dtc/account`
-2. Click **Continue with LinkedIn**
-3. Complete LinkedIn OAuth login
-4. Observe redirect back to AlmaShines
-
-**Expected Result:** User is authenticated and redirected to dashboard or role selection page.
-
-**Why Manual:** Same rationale as TC-M-01/02. LinkedIn rate-limits OAuth flows aggressively.
-
----
-
-## TC-M-04: OTP Expiry Validation
+## TC-M-01: OTP Expiry Validation
 
 **Category:** OTP Security  
 **Priority:** High
@@ -87,7 +34,7 @@ The automated suite covers happy-path and common-error scenarios for the email e
 
 ---
 
-## TC-M-05: Resend OTP Functionality
+## TC-M-02: Resend OTP Functionality
 
 **Category:** OTP Flow  
 **Priority:** Medium
@@ -106,25 +53,7 @@ The automated suite covers happy-path and common-error scenarios for the email e
 
 ---
 
-## TC-M-06: Forgot Password Flow
-
-**Category:** Authentication Recovery  
-**Priority:** High
-
-**Steps:**
-1. Enter a registered email and arrive at the login form
-2. Click **Forgot password?**
-3. Observe the recovery flow (email link or OTP)
-4. Complete password reset
-5. Log in with the new password
-
-**Expected Result:** User can reset their password and log in successfully with the new credentials.
-
-**Why Manual:** The forgot-password flow likely sends an email to the registered inbox. Automating this would require a real inbox that accepts password-reset emails — our `dipamshahaliantesting1@gmail.com` test account would need its password changed, breaking subsequent test runs. Manual execution preserves the stable test account.
-
----
-
-## TC-M-07: Responsive Layout on Mobile Viewports
+## TC-M-03: Responsive Layout on Mobile Viewports
 
 **Category:** UI / Accessibility  
 **Priority:** Medium
@@ -141,7 +70,7 @@ The automated suite covers happy-path and common-error scenarios for the email e
 
 ---
 
-## TC-M-08: Cross-Browser Compatibility
+## TC-M-04: Cross-Browser Compatibility
 
 **Category:** Browser Compatibility  
 **Priority:** Medium
@@ -159,44 +88,7 @@ The automated suite covers happy-path and common-error scenarios for the email e
 
 ---
 
-## TC-M-09: Complete Role Selection and Join Network
-
-**Category:** End-to-End Happy Path  
-**Priority:** Critical  
-**Automated:** `tests/test_06_e2e_signup.py::test_full_signup_including_role_selection`
-
-**Steps:**
-1. Complete full signup (email → registration → OTP verification) with a brand-new email
-2. On the role selection page, select **Alumni (Past Student)**
-3. Select Year of Joining: **2018**
-4. Select Year of Graduation: **2022**
-5. Check both the Privacy Policy and Consent Form checkboxes
-6. Click **Join Alumni Network**
-7. Observe the resulting page
-
-**Expected Result:** User successfully joins the network and is redirected to the alumni dashboard or a welcome/profile-completion screen.
-
-**Note:** This case is now covered by the automated E2E test listed above, which uses a Guerrilla Mail disposable address so no real user data is created. It remains documented here as a manual fallback for when the automated test is skipped due to platform rate limiting.
-
----
-
-## TC-M-10: Session Persistence After Browser Restart
-
-**Category:** Session / Authentication  
-**Priority:** Low
-
-**Steps:**
-1. Complete login (email + password) on the login form
-2. Close the browser entirely
-3. Reopen the browser and navigate to `https://www.almashines.com/dtc/account`
-
-**Expected Result:** The user remains logged in (session cookie persisted) OR is redirected to the login page (session not persisted) — either behaviour should be consistent and documented.
-
-**Why Manual:** Automated tests use a fresh browser context per test run. Verifying cross-session persistence requires real browser state to survive process restart, which doesn't happen in automated Playwright contexts.
-
----
-
-## TC-M-11: Deep Link Redirect After Login
+## TC-M-05: Deep Link Redirect After Login
 
 **Category:** Navigation / Authentication  
 **Priority:** Medium
