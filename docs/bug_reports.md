@@ -55,52 +55,58 @@ Or rely on the HTML `<input type="email">` attribute which natively rejects miss
 
 ---
 
-## BUG-002: Rate Limiting During Registration Produces No User-Facing Feedback
+## BUG-002: Registration Sign Up Button Silently Does Nothing When Rate Limited
 
-**Severity:** Medium  
-**Priority:** Medium  
+**Severity:** High  
+**Priority:** High  
 **Type:** UX / Error Handling  
 **Status:** Open  
 **Automated test:** `conftest.py::otp_page` fixture (skips with diagnostic message when triggered)
 
 ### Description
 
-When multiple registrations are submitted in quick succession from the same IP address, the platform silently blocks further registrations. Instead of showing a clear, user-facing message explaining the restriction, it either:
-- Shows a generic SweetAlert dialog with no description, or
-- Allows the registration form to submit but never navigates to the OTP step (the user is left on a blank state with no indication of what went wrong)
+When multiple registrations are submitted in quick succession from the same IP address, the platform enforces a rate limit — but gives the user **zero feedback** that this has happened. Clicking the Sign Up button shows a brief loading state and then stops. No error message, no dialog, no redirect. The page looks exactly the same as before the click, making it appear as though the button is broken or the page has frozen.
 
 ### Steps to Reproduce
 
 1. Navigate to `https://www.almashines.com/dtc/account`
-2. Submit a new email and complete the registration form → observe OTP step
-3. Immediately repeat steps 1–2 three to five times in rapid succession (within ~60 seconds)
+2. Submit a new email, fill the registration form, reach the OTP step — note the flow works
+3. Navigate back and immediately repeat with a fresh email two to three more times (within ~60 seconds)
+4. On the third or fourth attempt, fill the registration form and click **Sign Up**
 
 ### Actual Result
 
-On the fourth or fifth attempt, one of the following occurs:
-- A SweetAlert dialog appears with a title and/or body message that provides insufficient context (e.g., no mention of rate limiting, no guidance on how long to wait)
-- The registration form submits successfully (no error shown) but the OTP step never appears, leaving the user on a blank screen
+- The Sign Up button shows a loading/spinner state briefly
+- Then returns to its normal state
+- **Nothing else happens** — no error message, no SweetAlert dialog, no navigation to the OTP step
+- The user has no indication that they have been rate limited, how long to wait, or what to do next
+- The only way to diagnose this is to inspect the Network tab in DevTools and observe the API response
 
 ### Expected Result
 
-The platform should display a clear, informative message such as:
+The platform should display a clear, user-facing message, for example:
 > *"Too many registration attempts. Please wait a few minutes before trying again."*
 
-The user should also be informed how long the block lasts, if possible.
+At minimum, any error response from the server should be surfaced to the user rather than silently swallowed.
+
+### Observed Behaviour History
+
+An earlier version of this behaviour showed a generic SweetAlert dialog on rate limiting. That dialog has since disappeared, making the current failure **strictly worse** — at least a vague dialog gave the user a signal that something went wrong.
 
 ### Impact
 
-- Legitimate users who accidentally submit the form multiple times (double-click, network retry) will be silently blocked with no recovery path shown
-- QA teams running automated test suites hit this limit and receive no actionable diagnostic — making test failures ambiguous between a product bug and a rate-limit side effect
+- **Regular users**: Anyone who double-clicks the button, has a slow connection and retries, or refreshes and resubmits will be silently blocked with no way to know why or how to recover
+- **QA / automation**: Test suites that run multiple signups hit this limit and see the button silently do nothing — making it ambiguous whether the failure is a product bug or a rate-limit side effect, adding debugging overhead
 
 ### Root Cause (Hypothesis)
 
-The server-side rate limit is enforced but the corresponding HTTP error response is either not mapped to a user-friendly UI message, or the AngularJS error handler swallows the response body without rendering it.
+The server returns an error response (likely HTTP 429 Too Many Requests) when the rate limit is hit, but the AngularJS error handler either swallows the response body entirely or maps it to no UI output. The button's loading state completes without any success or failure branch being rendered.
 
 ### Recommended Fix
 
-1. Map the rate-limit HTTP response (likely 429 Too Many Requests) to a dedicated SweetAlert or inline error with a clear message and a countdown timer
-2. Include a `Retry-After` header in the API response and display the wait time to the user
+1. Map the rate-limit API response to a user-facing error — a SweetAlert, an inline message, or a toast notification
+2. Include a `Retry-After` value in the response and show the user how long to wait
+3. Disable or debounce the Sign Up button after the first click to prevent accidental rapid resubmission
 
 ---
 
