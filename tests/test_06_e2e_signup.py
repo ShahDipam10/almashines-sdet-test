@@ -72,16 +72,3 @@ def test_complete_signup_journey_with_otp(page):
         "OTP input is still visible after verification — signup may have failed"
 
 
-@pytest.mark.e2e
-def test_duplicate_email_signup_redirects_to_login(page):
-    """
-    Register with a Guerrilla Mail address, then immediately try to sign up
-    with the same address again — should redirect to the login form.
-
-    NOTE: This test only runs if the first signup (test above) completed
-    successfully with the same email. Adjust or skip if test ordering differs.
-    """
-    pytest.skip(
-        "Requires an email that was registered in the same session. "
-        "Run test_complete_signup_journey_with_otp first, then re-enable."
-    )
