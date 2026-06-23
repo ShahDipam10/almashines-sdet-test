@@ -7,9 +7,6 @@ class SignupPage(BasePage):
     EMAIL_INPUT = "#email"
     SUBMIT_BTN = "#emailBtn"
     HEADING = "h2"
-    FB_BTN = "#fbBtn"
-    GOOGLE_BTN = "#googleBtn"
-    LINKEDIN_BTN = "#linkedInBtn"
 
     def enter_email(self, email: str):
         self.page.fill(self.EMAIL_INPUT, email)

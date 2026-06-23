@@ -185,7 +185,7 @@ The automated suite covers happy-path and common-error scenarios for the email e
 **Priority:** Low
 
 **Steps:**
-1. Complete login (email + password) on the sign in form
+1. Complete login (email + password) on the login form
 2. Close the browser entirely
 3. Reopen the browser and navigate to `https://www.almashines.com/dtc/account`
 
