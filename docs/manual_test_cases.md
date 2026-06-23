@@ -1,7 +1,7 @@
 # Manual Test Cases — AlmaShines Sign Up / Login Flow
 
 **Scope:** Sign Up and Login flow at `https://www.almashines.com/dtc/account`
-**Tester:** SDET Candidate
+**Tester:** Dipam Shah
 **Date:** 2026-06-23
 **Platform:** AlmaShines (Test Environment)
 
@@ -162,7 +162,8 @@ The automated suite covers happy-path and common-error scenarios for the email e
 ## TC-M-09: Complete Role Selection and Join Network
 
 **Category:** End-to-End Happy Path  
-**Priority:** Critical
+**Priority:** Critical  
+**Automated:** `tests/test_06_e2e_signup.py::test_full_signup_including_role_selection`
 
 **Steps:**
 1. Complete full signup (email → registration → OTP verification) with a brand-new email
@@ -175,7 +176,7 @@ The automated suite covers happy-path and common-error scenarios for the email e
 
 **Expected Result:** User successfully joins the network and is redirected to the alumni dashboard or a welcome/profile-completion screen.
 
-**Why Manual:** This test has an irreversible side-effect — it actually creates a permanent account tied to the email. In automation this would litter the platform with test accounts. Manual execution lets the tester decide when to commit the action and can use a controlled email address whose cleanup is managed separately.
+**Note:** This case is now covered by the automated E2E test listed above, which uses a Guerrilla Mail disposable address so no real user data is created. It remains documented here as a manual fallback for when the automated test is skipped due to platform rate limiting.
 
 ---
 
@@ -195,24 +196,7 @@ The automated suite covers happy-path and common-error scenarios for the email e
 
 ---
 
-## TC-M-11: Password Visibility Toggle
-
-**Category:** Usability  
-**Priority:** Low
-
-**Steps:**
-1. Navigate to sign up and submit a new email to reach the registration form
-2. Click the eye icon (if present) next to the Password field
-3. Verify that the password text becomes readable
-4. Click again to hide it
-
-**Expected Result:** Password visibility toggles correctly between `type="password"` and `type="text"`.
-
-**Why Manual:** The toggle exists in many login forms and is a quick manual check. The current registration form on this platform was observed without a toggle icon during testing — this case is listed to confirm its absence is intentional.
-
----
-
-## TC-M-12: Deep Link Redirect After Login
+## TC-M-11: Deep Link Redirect After Login
 
 **Category:** Navigation / Authentication  
 **Priority:** Medium
