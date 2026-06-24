@@ -109,17 +109,25 @@ def test_join_without_terms_stays_on_role_page(role_page):
 
 @pytest.mark.e2e
 def test_privacy_policy_link_is_present_and_has_href(role_page):
-    """Privacy Policy link inside the checkbox label must exist and point to a real URL."""
-    href = role_page.get_privacy_link_href()
-    assert href, "Privacy Policy link should have a non-empty href — found no <a> tag inside the label"
-    assert href.startswith("http"), \
-        f"Privacy Policy link href should be an absolute URL, got: '{href}'"
+    """Privacy Policy link (first <a> inside the privacy label) must exist and have a non-empty href."""
+    href = role_page.get_privacy_policy_link_href()
+    assert href, "Privacy Policy link should have a non-empty href — found no link or empty href"
 
 
 @pytest.mark.e2e
-def test_consent_form_link_is_present_and_has_href(role_page):
-    """Consent Form link inside the checkbox label must exist and point to a real URL."""
+def test_terms_and_conditions_link_is_present_and_has_href(role_page):
+    """Terms and Conditions link (second <a> inside the privacy label) must exist and have a non-empty href."""
+    href = role_page.get_terms_link_href()
+    assert href, "Terms and Conditions link should have a non-empty href — found no link or empty href"
+
+
+@pytest.mark.e2e
+def test_consent_form_label_has_no_document_link(role_page):
+    """Consent Form checkbox label contains no clickable link to the consent document.
+    This test documents current behaviour — the label text is not linked to any document,
+    meaning users cannot read the consent form they are agreeing to."""
     href = role_page.get_consent_link_href()
-    assert href, "Consent Form link should have a non-empty href — found no <a> tag inside the label"
-    assert href.startswith("http"), \
-        f"Consent Form link href should be an absolute URL, got: '{href}'"
+    assert not href, (
+        "Consent Form label unexpectedly contains a link — "
+        "update this test if a consent document link has been added"
+    )

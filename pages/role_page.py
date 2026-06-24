@@ -17,7 +17,8 @@ class RolePage:
     CONSENT_CHECKBOX = "#consent-form"
     PRIVACY_LABEL = 'label[for="privacy-terms"]'
     CONSENT_LABEL = 'label[for="consent-form"]'
-    PRIVACY_LINK = 'label[for="privacy-terms"] a'
+    # Privacy label contains two links: Privacy Policy (first) and Terms and Conditions (second)
+    PRIVACY_LINKS = 'label[for="privacy-terms"] a'
     CONSENT_LINK = 'label[for="consent-form"] a'
     JOIN_BTN = "#btn3_sgnup"
     PAGE_HEADING = "text=Add your role details in"
@@ -76,8 +77,14 @@ class RolePage:
         options = self.page.locator(f"{self.ROLE_SELECT} option").all()
         return [o.text_content().strip() for o in options if o.text_content().strip()]
 
-    def get_privacy_link_href(self) -> str:
-        return self.page.locator(self.PRIVACY_LINK).get_attribute("href") or ""
+    def get_privacy_policy_link_href(self) -> str:
+        return self.page.locator(self.PRIVACY_LINKS).nth(0).get_attribute("href") or ""
+
+    def get_terms_link_href(self) -> str:
+        return self.page.locator(self.PRIVACY_LINKS).nth(1).get_attribute("href") or ""
 
     def get_consent_link_href(self) -> str:
-        return self.page.locator(self.CONSENT_LINK).get_attribute("href") or ""
+        links = self.page.locator(self.CONSENT_LINK).all()
+        if not links:
+            return ""
+        return links[0].get_attribute("href") or ""
