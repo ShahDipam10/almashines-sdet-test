@@ -5,8 +5,8 @@ After OTP verification the platform shows a role selection form
 at /dtc/switch?signup=<id>. These E2E tests cover:
   - Page presence and heading
   - Role dropdown options
-  - Dynamic year fields (appear only after a role is chosen)
-  - Terms & consent checkboxes
+  - Dynamic year fields (Student/Alumni show both YOJ+YOP; Staff shows only YOJ)
+  - Terms & consent checkboxes and their policy links
   - Validation: cannot join without role or without accepting terms
 
 Each test uses the `role_page` fixture which performs a full signup
@@ -58,13 +58,23 @@ def test_year_fields_hidden_before_role_selection(role_page):
 
 
 @pytest.mark.e2e
-def test_year_fields_appear_after_role_selection(role_page):
-    """Selecting a role reveals both year fields (behaviour is the same for all 3 roles)."""
+def test_year_fields_appear_for_student_and_alumni(role_page):
+    """Current Student and Alumni roles should reveal both Year of Joining and Year of Graduation."""
     role_page.select_role(role_page.ROLE_CURRENT_STUDENT)
     assert role_page.is_yoj_visible(), \
-        "Year of Joining should appear after selecting a role"
+        "Year of Joining should appear after selecting Current Student"
     assert role_page.is_yop_visible(), \
-        "Year of Graduation should appear after selecting a role"
+        "Year of Graduation should appear after selecting Current Student"
+
+
+@pytest.mark.e2e
+def test_staff_role_shows_only_year_of_joining(role_page):
+    """Staff / Faculty role should reveal Year of Joining but NOT Year of Graduation."""
+    role_page.select_role(role_page.ROLE_STAFF)
+    assert role_page.is_yoj_visible(), \
+        "Year of Joining should appear after selecting Staff / Faculty"
+    assert not role_page.is_yop_visible(), \
+        "Year of Graduation should NOT appear for Staff / Faculty — staff have no graduation year"
 
 
 @pytest.mark.e2e
@@ -95,3 +105,21 @@ def test_join_without_terms_stays_on_role_page(role_page):
     role_page.click_join()
     assert role_page.is_visible(), \
         "Without accepting terms, clicking Join should keep user on the role page"
+
+
+@pytest.mark.e2e
+def test_privacy_policy_link_is_present_and_has_href(role_page):
+    """Privacy Policy link inside the checkbox label must exist and point to a real URL."""
+    href = role_page.get_privacy_link_href()
+    assert href, "Privacy Policy link should have a non-empty href — found no <a> tag inside the label"
+    assert href.startswith("http"), \
+        f"Privacy Policy link href should be an absolute URL, got: '{href}'"
+
+
+@pytest.mark.e2e
+def test_consent_form_link_is_present_and_has_href(role_page):
+    """Consent Form link inside the checkbox label must exist and point to a real URL."""
+    href = role_page.get_consent_link_href()
+    assert href, "Consent Form link should have a non-empty href — found no <a> tag inside the label"
+    assert href.startswith("http"), \
+        f"Consent Form link href should be an absolute URL, got: '{href}'"

@@ -20,9 +20,9 @@ The suite covers the full Sign Up journey across 7 test modules:
 | Registration form | `test_04_registration.py` | 13 regression |
 | OTP verification | `test_05_otp_step.py` | 12 regression |
 | Full E2E signup with real OTP | `test_06_e2e_signup.py` | 2 e2e |
-| Role selection (post-OTP) | `test_07_role_selection.py` | 8 e2e |
+| Role selection (post-OTP) | `test_07_role_selection.py` | 11 e2e |
 
-**Total: 56 tests**
+**Total: 59 tests**
 
 ---
 
@@ -151,7 +151,7 @@ Open it in any browser. Failed tests also save a screenshot to `reports/screensh
 |--------------|-------|----------------|
 | `smoke`      | 5     | Page loads, key elements present |
 | `regression` | 41    | All form validations, paths, error messages |
-| `e2e`        | 10    | Full signup with real OTP (Guerrilla Mail) + role selection + complete join |
+| `e2e`        | 13    | Full signup with real OTP (Guerrilla Mail) + role selection + complete join |
 
 ---
 
