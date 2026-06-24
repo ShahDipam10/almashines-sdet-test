@@ -160,8 +160,7 @@ Replace the integer `signup` ID with a cryptographically random, single-use toke
 **Severity:** High  
 **Priority:** High  
 **Type:** Functional / State Management / Race Condition  
-**Status:** Open  
-**Evidence:** Screenshot shared during manual testing — email field stuck in loading state with red border after refresh-triggered navigation
+**Status:** Open
 
 ### Description
 
