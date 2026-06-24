@@ -52,7 +52,7 @@ The suite covers the full Sign Up journey across 7 test modules:
 │
 ├── docs/
 │   ├── manual_test_cases.md   Task 2 — test cases not automated (with rationale)
-│   └── bug_reports.md         Task 3 — 3 bug reports found during testing
+│   └── bug_reports.md         Task 3 — 10 bug reports found during testing
 │
 ├── reports/                   Auto-generated HTML report + failure screenshots
 ├── conftest.py                Shared pytest fixtures
