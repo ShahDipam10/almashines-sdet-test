@@ -119,6 +119,43 @@ def test_back_button_returns_to_email_step(registration_page):
 
 
 @pytest.mark.regression
+def test_very_long_field_values_show_error(registration_page):
+    """BUG-009: Extremely long name/password values silently block Sign Up with no feedback.
+    This test intentionally fails to document this bug."""
+    long_string = "A" * 200
+    registration_page.enter_first_name(long_string)
+    registration_page.enter_last_name(long_string)
+    registration_page.enter_password(long_string + "@1")
+    registration_page.enter_confirm_password(long_string + "@1")
+    registration_page.click_signup()
+
+    otp_visible = registration_page.page.locator("#otp_input").is_visible()
+    errors = registration_page.get_visible_errors()
+    assert otp_visible or any(errors), \
+        "BUG-009: Very long field values silently block Sign Up — no error shown, no OTP step reached"
+
+
+@pytest.mark.regression
+def test_weak_password_without_complexity_is_rejected(registration_page):
+    """BUG-011: Platform accepts passwords with no uppercase, special char, or numeric characters.
+    This test intentionally fails to document the missing complexity validation."""
+    registration_page.enter_first_name("Test")
+    registration_page.enter_last_name("User")
+    registration_page.enter_password("abcdefgh")   # 8 chars, all lowercase, no complexity
+    registration_page.enter_confirm_password("abcdefgh")
+    registration_page.click_signup()
+
+    errors = registration_page.get_visible_errors()
+    has_complexity_error = any(
+        keyword in e.lower()
+        for e in errors
+        for keyword in ("uppercase", "special", "number", "strong", "complexity")
+    )
+    assert has_complexity_error, \
+        "BUG-011: Weak password 'abcdefgh' was accepted — platform should enforce complexity requirements"
+
+
+@pytest.mark.regression
 def test_login_form_does_not_appear_for_new_email(registration_page):
     """Login password field should NOT appear for a new (unregistered) email."""
     assert not registration_page.page.locator("#passwordLogin").is_visible(), \

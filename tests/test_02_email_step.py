@@ -68,6 +68,21 @@ def test_valid_email_proceeds_to_next_step(signup_page):
 
 
 @pytest.mark.regression
+def test_long_email_shows_validation_message(signup_page):
+    """BUG-007: A 250-character email is silently rejected with only a red border.
+    The platform should display an error message explaining the issue.
+    This test intentionally fails to document this bug."""
+    long_email = "a" * 240 + "@gmail.com"  # 250 chars total
+    signup_page.submit_email(long_email)
+    # Platform stays on email step (correct) but shows no error message (bug)
+    error_visible = signup_page.page.locator(
+        "text=too long, text=maximum, text=characters, .mdl-textfield__error"
+    ).first.is_visible()
+    assert error_visible, \
+        "BUG-007: No error message shown for 250-char email — field turns red but user gets no explanation"
+
+
+@pytest.mark.regression
 def test_gmail_plus_alias_is_accepted(signup_page):
     """Gmail alias (user+tag@gmail.com) is a valid email format."""
     from utils.data_generators import generate_test_email
