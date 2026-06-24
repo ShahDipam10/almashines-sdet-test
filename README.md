@@ -169,7 +169,7 @@ No Gmail credentials or OAuth setup required.
 
 ## Bugs Found
 
-I documented 10 bugs in [`docs/bug_reports.md`](docs/bug_reports.md):
+I documented 11 bugs in [`docs/bug_reports.md`](docs/bug_reports.md):
 
 - **BUG-001 (High):** Email without TLD (`user@domain`) is accepted — backed by an intentionally failing automated test in `test_02_email_step.py`
 - **BUG-002 (High):** Rate limiting during rapid registrations silently does nothing — no error, no feedback
@@ -181,6 +181,7 @@ I documented 10 bugs in [`docs/bug_reports.md`](docs/bug_reports.md):
 - **BUG-008 (Low):** Long password text overlaps the show/hide eye icon in the password field
 - **BUG-009 (High):** Very long name/password values silently block Sign Up with no feedback
 - **BUG-010 (Low):** Browser autofill causes placeholder text to overlap with the autofilled field content
+- **BUG-011 (Low):** Password field has no strength validation — any string including `abc` is accepted
 
 ---
 

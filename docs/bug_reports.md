@@ -1,7 +1,7 @@
 # Bug Reports — AlmaShines Sign Up / Login Flow
 
 **Reporter:** Dipam Shah  
-**Date:** 2026-06-23 (BUG-001 to BUG-003) · 2026-06-24 (BUG-004 to BUG-010)  
+**Date:** 2026-06-23 (BUG-001 to BUG-003) · 2026-06-24 (BUG-004 to BUG-011)  
 **Environment:** `https://www.almashines.com/dtc/account` (Production / Test Platform)  
 **Browser:** Chromium 124 (via Playwright 1.44.0)
 
@@ -525,3 +525,55 @@ Browser autofill injects values directly into the DOM without firing the JavaScr
 1. Listen for the `animationstart` event triggered by autofill CSS (a common cross-browser detection technique) and manually trigger an Angular digest cycle to sync the model
 2. Alternatively, use a `MutationObserver` on the input to detect when the browser injects a value
 3. Apply the CSS fix: use `:autofill` / `:-webkit-autofill` pseudo-class to force the label into the "filled" position whenever the browser autofill state is active
+
+---
+
+## BUG-011: Password Field Has No Strength Validation
+
+**Severity:** Low  
+**Priority:** Medium  
+**Type:** Security / Validation  
+**Status:** Open
+
+### Description
+
+The password field on the registration form accepts any string as a valid password — including single characters, dictionary words, and trivially guessable values like `abc` or `123`. There is no minimum length requirement and no complexity check for uppercase letters, lowercase letters, numbers, or special characters.
+
+For a platform that stores personal academic and professional data, accepting weak passwords is a security gap and goes against standard industry practice.
+
+### Steps to Reproduce
+
+1. Navigate to `https://www.almashines.com/dtc/account`
+2. Enter a new email and proceed to the registration form
+3. Enter a very weak password (e.g. `abc`) in the Password field
+4. Click **Sign Up**
+
+### Actual Result
+
+The form accepts the weak password without any validation error and proceeds to send the OTP. The account is created with a trivially guessable password.
+
+### Expected Result
+
+The platform should enforce a minimum password policy, for example:
+- At least 8 characters
+- At least one uppercase letter
+- At least one lowercase letter
+- At least one number
+- At least one special character (e.g. `@`, `#`, `!`)
+
+An inline error message should be shown if the entered password does not meet the policy, before the user can submit.
+
+### Impact
+
+- Users can create accounts with extremely weak passwords, making them vulnerable to brute-force and credential-stuffing attacks
+- No visual strength indicator means users have no guidance on what makes a good password
+
+### Root Cause (Hypothesis)
+
+The AngularJS form validation for the password field only checks that the field is non-empty (`ng-required`). No `ng-pattern` or custom validator enforcing complexity rules has been applied.
+
+### Recommended Fix
+
+1. Define a password policy and add an `ng-pattern` directive with a regex that enforces it
+2. Show real-time inline feedback as the user types (e.g. a strength meter or a checklist of requirements)
+3. Enforce the same policy server-side so it cannot be bypassed via direct API calls
