@@ -1,7 +1,7 @@
 # Bug Reports — AlmaShines Sign Up / Login Flow
 
 **Reporter:** Dipam Shah  
-**Date:** 2026-06-23 (BUG-001 to BUG-003) · 2026-06-24 (BUG-004 to BUG-006)  
+**Date:** 2026-06-23 (BUG-001 to BUG-003) · 2026-06-24 (BUG-004 to BUG-010)  
 **Environment:** `https://www.almashines.com/dtc/account` (Production / Test Platform)  
 **Browser:** Chromium 124 (via Playwright 1.44.0)
 
@@ -327,3 +327,201 @@ Angular's two-way data binding (`ng-model`) keeps the password value in the scop
 1. On lockout: explicitly clear the password field value in the lockout handler before showing the blocking message
 2. On `hideDetailsForm()` (back navigation reset): clear all password-related fields from the scope model as part of the reset
 3. As a general rule: password fields should never retain their value across any authentication failure or navigation reset event
+
+---
+
+## BUG-007: 250-Character Email Silently Rejected With Only a Red Border — No Error Message
+
+**Severity:** Medium  
+**Priority:** Medium  
+**Type:** UX / Validation  
+**Status:** Open
+
+### Description
+
+When a user enters an email address that is exactly 250 characters long (including the `@gmail.com` domain portion) and clicks **Next**, the platform silently rejects the input by turning the email field red. No error message, tooltip, or inline text is shown to explain what went wrong. The user has no idea whether the issue is the length, an invalid character, or something else entirely.
+
+### Steps to Reproduce
+
+1. Navigate to `https://www.almashines.com/dtc/account`
+2. Construct an email with a very long local part so the total length reaches 250 characters (e.g. `aaaa...aaa@gmail.com`)
+3. Paste it into the email field and click **Next**
+
+### Actual Result
+
+The email input field turns red (error state). No error message is displayed anywhere on the page. No navigation occurs. The user receives zero explanation.
+
+### Expected Result
+
+A clear, inline validation message should appear, for example:
+> *"Email address is too long. Please use an address with fewer than X characters."*
+
+The maximum allowed length should be enforced and communicated upfront, not silently after submission.
+
+### Impact
+
+- Users with legitimate long email addresses (uncommon but valid per RFC) cannot sign up and receive no guidance on what to fix
+- Silent red border alone is not accessible — screen readers and users with colour blindness get no signal at all
+- Creates confusion: the user may assume the platform is broken rather than understanding it is a length restriction
+
+### Root Cause (Hypothesis)
+
+The AngularJS model or the backend API enforces a character limit on the email field but the error handler only triggers the red-border CSS class without populating an error message string in the template.
+
+### Recommended Fix
+
+1. Define and document the maximum allowed email length
+2. Show an explicit inline error message when the limit is exceeded
+3. Optionally enforce the limit client-side with `maxlength` on the input so the user cannot even type past the limit
+
+---
+
+## BUG-008: Long Password Text Overlaps the Show/Hide Eye Icon
+
+**Severity:** Low  
+**Priority:** Low  
+**Type:** UI / Layout  
+**Status:** Open  
+**Evidence:** Screenshot captured during manual testing — password text visually overlaps the eye icon in the password field
+
+### Description
+
+When a sufficiently long password is typed into the password field on the registration form, the text content overflows and visually overlaps with the show/hide password toggle icon (the eye icon) on the right side of the field. The icon becomes partially or fully obscured, making it difficult to click.
+
+### Steps to Reproduce
+
+1. Navigate to `https://www.almashines.com/dtc/account`
+2. Enter a new email and proceed to the registration form
+3. In the **Password** field, type a long string (approximately 30+ characters)
+4. Observe the right end of the password field
+
+### Actual Result
+
+The password text bleeds into the eye icon area. The icon is visually covered by the text, making the toggle hard to see and harder to click accurately.
+
+### Expected Result
+
+The password input field should have sufficient right-side padding to ensure the typed text never overlaps the eye icon, regardless of password length.
+
+### Impact
+
+- Users who type long passwords (a security best practice) cannot easily toggle password visibility
+- Pure cosmetic/layout issue but it degrades the experience for security-conscious users who rely on the toggle to verify what they typed
+
+### Root Cause (Hypothesis)
+
+The password `<input>` element does not have a `padding-right` value large enough to account for the absolutely-positioned eye icon overlay. Long text simply runs to the end of the input's text area without being clipped before the icon.
+
+### Recommended Fix
+
+Add sufficient `padding-right` to the password input so text never reaches the icon area:
+```css
+input[type="password"] {
+  padding-right: 40px; /* adjust to match eye icon width */
+}
+```
+
+---
+
+## BUG-009: Very Long Name and Password Values Silently Block Sign Up
+
+**Severity:** High  
+**Priority:** High  
+**Type:** Functional / Validation  
+**Status:** Open  
+**Evidence:** Screenshot captured during manual testing — Sign Up button clicked with no response after entering extremely long field values
+
+### Description
+
+When excessively long values are entered in the First Name, Last Name, and/or Password fields on the registration form and the user clicks **Sign Up**, nothing happens. No error message, no navigation to the OTP step, no visible feedback of any kind. The button appears to do nothing at all.
+
+This is a silent failure on what should be a clearly communicated input validation error.
+
+### Steps to Reproduce
+
+1. Navigate to `https://www.almashines.com/dtc/account`
+2. Enter a valid new email and click **Next**
+3. On the registration form, enter an extremely long string in **First Name** (e.g. 200+ characters), repeat for **Last Name** and **Password**
+4. Click **Sign Up**
+
+### Actual Result
+
+The Sign Up button does nothing — no loading state, no error message, no navigation. The form stays exactly as it was. The user has no indication that field length is the problem.
+
+### Expected Result
+
+The platform should either:
+- Enforce a `maxlength` attribute on the input so the user cannot type beyond the limit, OR
+- Display a clear validation error on submit, such as *"First name must be 50 characters or fewer"*
+
+Under no circumstance should clicking Sign Up result in complete silence.
+
+### Impact
+
+- Users who paste long values (e.g. accidentally paste the wrong content) are permanently stuck on the form with no guidance
+- Indistinguishable from BUG-002 (rate limiting silent failure) from the user's perspective — both result in Sign Up doing nothing
+- Potentially a server-side rejection that is not surfaced to the frontend
+
+### Root Cause (Hypothesis)
+
+The backend likely enforces field length limits and returns a validation error, but the AngularJS form handler either ignores the error response or the `ng-maxlength` directive silently prevents submission without triggering a visible error template.
+
+### Recommended Fix
+
+1. Add `maxlength` attributes to all text inputs with clearly defined limits
+2. Show inline validation errors when limits are exceeded, before the user even clicks Sign Up
+3. Ensure any server-side length rejection is mapped to a user-facing error message
+
+---
+
+## BUG-010: Browser Autofill Causes Placeholder Text to Overlap With Field Content
+
+**Severity:** Low  
+**Priority:** Low  
+**Type:** UI / Compatibility  
+**Status:** Open  
+**Evidence:** Screenshots captured during manual testing — placeholder text visible on top of autofilled email and browser-suggested password
+
+### Description
+
+When the browser autofills the email field (from saved login credentials) or suggests a password (via the browser's built-in password manager), the AngularJS-controlled placeholder text does not clear. This results in the placeholder label visually overlapping with the autofilled content — two pieces of text occupy the same space simultaneously.
+
+This affects two fields:
+- **Email field**: Autofilled email + placeholder label overlap
+- **Password field**: Browser-suggested password + placeholder label overlap
+
+### Steps to Reproduce
+
+**Scenario A — Email autofill:**
+1. Save login credentials for `almashines.com` in the browser
+2. Navigate to `https://www.almashines.com/dtc/account`
+3. Observe the email field — the browser autofills the saved email
+
+**Scenario B — Password suggestion:**
+1. Navigate to the registration form
+2. Click on the Password field — the browser suggests a saved or auto-generated password
+3. Accept the browser suggestion
+
+### Actual Result
+
+In both cases: the browser fills the input value, but the AngularJS floating placeholder/label does not move or disappear. The placeholder text and the actual field content are shown on top of each other, making both unreadable.
+
+### Expected Result
+
+The placeholder or floating label should detect that the field has a value (including browser-injected values) and move or hide accordingly, exactly as it does when the user types manually.
+
+### Impact
+
+- Affects any returning user whose browser has saved credentials — a common real-world scenario
+- Makes the filled value unreadable, which may cause users to clear and retype credentials they didn't need to
+- A known and well-documented issue with AngularJS `ng-model` and browser autofill — it is fixable and commonly fixed in production apps
+
+### Root Cause (Hypothesis)
+
+Browser autofill injects values directly into the DOM without firing the JavaScript `input` or `change` events that AngularJS `ng-model` listens to. As a result, Angular's scope model does not update, the placeholder considers the field empty, and the floating label stays in the "empty" position.
+
+### Recommended Fix
+
+1. Listen for the `animationstart` event triggered by autofill CSS (a common cross-browser detection technique) and manually trigger an Angular digest cycle to sync the model
+2. Alternatively, use a `MutationObserver` on the input to detect when the browser injects a value
+3. Apply the CSS fix: use `:autofill` / `:-webkit-autofill` pseudo-class to force the label into the "filled" position whenever the browser autofill state is active

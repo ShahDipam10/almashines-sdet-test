@@ -169,7 +169,7 @@ No Gmail credentials or OAuth setup required.
 
 ## Bugs Found
 
-I documented 6 bugs in [`docs/bug_reports.md`](docs/bug_reports.md):
+I documented 10 bugs in [`docs/bug_reports.md`](docs/bug_reports.md):
 
 - **BUG-001 (High):** Email without TLD (`user@domain`) is accepted — backed by an intentionally failing automated test in `test_02_email_step.py`
 - **BUG-002 (High):** Rate limiting during rapid registrations silently does nothing — no error, no feedback
@@ -177,6 +177,10 @@ I documented 6 bugs in [`docs/bug_reports.md`](docs/bug_reports.md):
 - **BUG-004 (High):** Page refresh on OTP step causes intermittent infinite loading on email re-submission
 - **BUG-005 (Medium):** Back button on OTP step skips the registration form and lands on email entry instead
 - **BUG-006 (Medium/Security):** Password field is never cleared after account lockout or back-navigation reset
+- **BUG-007 (Medium):** 250-character email silently rejected with only a red border — no error message shown
+- **BUG-008 (Low):** Long password text overlaps the show/hide eye icon in the password field
+- **BUG-009 (High):** Very long name/password values silently block Sign Up with no feedback
+- **BUG-010 (Low):** Browser autofill causes placeholder text to overlap with the autofilled field content
 
 ---
 
