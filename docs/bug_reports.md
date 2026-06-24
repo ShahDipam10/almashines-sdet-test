@@ -155,7 +155,69 @@ Replace the integer `signup` ID with a cryptographically random, single-use toke
 
 ---
 
-## BUG-004: Back Button on OTP Step Returns to Email Entry Instead of Registration Form
+## BUG-004: Page Refresh on OTP Step Causes Intermittent Infinite Loading on Email Submission
+
+**Severity:** High  
+**Priority:** High  
+**Type:** Functional / State Management / Race Condition  
+**Status:** Open  
+**Evidence:** Screenshot shared during manual testing — email field stuck in loading state with red border after refresh-triggered navigation
+
+### Description
+
+When a user refreshes the browser while on the OTP verification step, the platform loses its Angular in-memory session state and redirects the user back to the email entry page. At this point the URL gains a `?cid=1771` institution ID parameter that was not present in the original flow. When the user enters their email and clicks Next from this state, the behavior is **intermittent**:
+
+- Sometimes: the email submission triggers **infinite loading** — the Next button spins indefinitely and nothing happens. No error message, no navigation, no way forward except closing and reopening the tab.
+- Sometimes: the submission works correctly and proceeds to the sign up / login form as expected.
+
+The same URL, same parameter, same action — two different outcomes. This inconsistency is the core of the bug and points to a **race condition** rather than a simple broken state.
+
+### Steps to Reproduce
+
+1. Navigate to `https://www.almashines.com/dtc/account`
+2. Submit a new email, fill the registration form, click Sign Up — reach the OTP verification step
+3. **Refresh the browser** (F5 or browser refresh button) while on the OTP step
+4. The platform redirects to the email entry page — note the URL now shows `?cid=1771` appended
+5. Enter the email again and click **Next**
+
+### Actual Result
+
+**Intermittent outcome A (bug):** The Next button enters a loading/spinning state and stays there indefinitely. The email field shows a red border. No error message is displayed. No navigation occurs. The user has no indication of what went wrong or what to do next. The only recovery is to close the tab and start fresh.
+
+**Intermittent outcome B (works):** On a subsequent refresh with the same URL and parameter still present, the submission goes through correctly and the platform navigates to the appropriate next step.
+
+### Expected Result
+
+Refreshing the browser during any step of the sign up flow should result in one of these clean, predictable outcomes:
+- The platform restores the session state and returns the user to where they were, OR
+- The platform cleanly resets to the beginning of the flow with a clear message (e.g. *"Your session expired. Please start again."*)
+
+Under no circumstance should refreshing result in a silent infinite loading state with no recovery path.
+
+### Why Intermittent Bugs Are Particularly Serious
+
+Unlike a consistently broken feature, intermittent behavior is harder to catch, harder to reproduce, and tends to be dismissed until it is properly documented. The inconsistency here strongly suggests a **timing/race condition** — the Angular app sometimes initializes its state fast enough to handle the incoming email submission and sometimes does not. This type of issue typically worsens under server load, meaning more users hitting the platform simultaneously increases the frequency of the broken outcome.
+
+### Impact
+
+- Users who refresh during the OTP step (a completely normal action — refreshing is standard browser behaviour) can get permanently stuck with no error or guidance
+- No recovery path is available from within the page — the user must close and reopen the tab
+- The intermittent nature means it will appear to "work" during some QA passes and only surface in production
+
+### Root Cause (Hypothesis)
+
+When the browser refreshes on the OTP step, Angular's in-memory session context (signup state, email, form data) is wiped. The URL picks up the `?cid=1771` institution ID as a query parameter. When the user submits an email from this state, the Angular controller or the backend API call may attempt to reference session data that no longer exists, leading to a hanging promise or unresolved API call. The intermittency suggests the backend sometimes has the context cached (works) and sometimes does not (hangs).
+
+### Recommended Fix
+
+1. Implement proper session persistence (localStorage or server-side session) so that a page refresh during sign up restores state gracefully
+2. Add a timeout on all API calls within the sign up flow — if a call does not resolve within a reasonable window (e.g. 10 seconds), surface an error message to the user
+3. Strip or sanitise unexpected URL parameters (like `?cid=1771`) on page load to avoid the Angular router entering a confused state
+4. At minimum, add a global error handler that catches hanging/unresolved states and shows the user a clear message with a "Start over" action
+
+---
+
+## BUG-005: Back Button on OTP Step Returns to Email Entry Instead of Registration Form
 
 **Severity:** Medium  
 **Priority:** Medium  
