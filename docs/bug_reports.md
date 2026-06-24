@@ -382,7 +382,8 @@ The AngularJS model or the backend API enforces a character limit on the email f
 **Priority:** Low  
 **Type:** UI / Layout  
 **Status:** Open  
-**Evidence:** Screenshot captured during manual testing — password text visually overlaps the eye icon in the password field
+**Evidence:** Screenshot captured during manual testing — password text visually overlaps the eye icon in the password field  
+**Screenshot:** https://prnt.sc/_cIJnjX2wKgS
 
 ### Description
 
@@ -429,7 +430,8 @@ input[type="password"] {
 **Priority:** High  
 **Type:** Functional / Validation  
 **Status:** Open  
-**Evidence:** Screenshot captured during manual testing — Sign Up button clicked with no response after entering extremely long field values
+**Evidence:** Screenshot captured during manual testing — Sign Up button clicked with no response after entering extremely long field values  
+**Screenshot:** https://prnt.sc/FiYUiUeoINRi
 
 ### Description
 
@@ -480,7 +482,9 @@ The backend likely enforces field length limits and returns a validation error, 
 **Priority:** Low  
 **Type:** UI / Compatibility  
 **Status:** Open  
-**Evidence:** Screenshots captured during manual testing — placeholder text visible on top of autofilled email and browser-suggested password
+**Evidence:** Screenshots captured during manual testing — placeholder text visible on top of autofilled email and browser-suggested password  
+**Screenshot (email autofill):** https://prnt.sc/lYCpyB116r_U  
+**Screenshot (password suggestion):** https://prnt.sc/NU9hLxFRrzZK
 
 ### Description
 
