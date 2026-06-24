@@ -25,7 +25,7 @@ The automated suite covers happy-path and common-error scenarios for the email e
 **Steps:**
 1. Complete the registration form with a valid new email
 2. When the OTP input appears, do **not** enter the OTP
-3. Wait for the OTP to expire (expected window: 5–15 minutes — confirm with the platform spec)
+3. Wait for the OTP to expire (expected window: 10 minutes as mentioned in the OTP email)
 4. Enter any OTP code and click **Verify**
 
 **Expected Result:** Platform shows an error message indicating the OTP has expired and prompts the user to request a new one.
