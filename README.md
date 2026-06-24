@@ -169,11 +169,14 @@ No Gmail credentials or OAuth setup required.
 
 ## Bugs Found
 
-I documented 3 bugs in [`docs/bug_reports.md`](docs/bug_reports.md):
+I documented 6 bugs in [`docs/bug_reports.md`](docs/bug_reports.md):
 
 - **BUG-001 (High):** Email without TLD (`user@domain`) is accepted — backed by an intentionally failing automated test in `test_02_email_step.py`
-- **BUG-002 (Medium):** Rate limiting during rapid registrations shows no user-facing feedback
-- **BUG-003 (Security):** Sequential numeric signup IDs in the URL enable account enumeration
+- **BUG-002 (High):** Rate limiting during rapid registrations silently does nothing — no error, no feedback
+- **BUG-003 (Security/Medium):** Sequential numeric signup IDs in the URL enable account enumeration
+- **BUG-004 (High):** Page refresh on OTP step causes intermittent infinite loading on email re-submission
+- **BUG-005 (Medium):** Back button on OTP step skips the registration form and lands on email entry instead
+- **BUG-006 (Medium/Security):** Password field is never cleared after account lockout or back-navigation reset
 
 ---
 

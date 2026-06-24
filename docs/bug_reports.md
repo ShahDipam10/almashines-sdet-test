@@ -1,7 +1,7 @@
 # Bug Reports — AlmaShines Sign Up / Login Flow
 
 **Reporter:** Dipam Shah  
-**Date:** 2026-06-23 (BUG-001 to BUG-003) · 2026-06-24 (BUG-004 to BUG-011)  
+**Date:** 2026-06-23 (BUG-001 to BUG-003) · 2026-06-24 (BUG-004 to BUG-006)  
 **Environment:** `https://www.almashines.com/dtc/account` (Production / Test Platform)  
 **Browser:** Chromium 124 (via Playwright 1.44.0)
 
@@ -264,7 +264,7 @@ Implement step-aware back navigation. The Back button on the OTP step should cal
 
 ---
 
-## BUG-005: Password Field Retained in Sensitive Situations — Account Lockout and Post-Navigation
+## BUG-006: Password Field Retained in Sensitive Situations — Account Lockout and Post-Navigation
 
 **Severity:** Medium  
 **Priority:** High  
@@ -301,7 +301,7 @@ After a lockout event, the password field should be cleared. Retaining a passwor
 
 1. Navigate to `https://www.almashines.com/dtc/account`
 2. Enter a new email, fill the registration form including a password, and click **Sign Up**
-3. On the OTP step, click **Back** — lands on email entry (see BUG-004)
+3. On the OTP step, click **Back** — lands on email entry (see BUG-005)
 4. Click **Next** on the pre-filled email — registration form reappears
 
 #### Actual Result
