@@ -186,4 +186,4 @@ I documented 10 bugs in [`docs/bug_reports.md`](docs/bug_reports.md):
 
 ## Manual Test Cases
 
-Cases I chose not to automate (social OAuth, OTP expiry, mobile layout, cross-browser, etc.) are documented with rationale in [`docs/manual_test_cases.md`](docs/manual_test_cases.md).
+Cases I chose not to automate (OTP expiry, mobile layout, cross-browser, deep link redirect) are documented with rationale in [`docs/manual_test_cases.md`](docs/manual_test_cases.md).
